@@ -14,6 +14,9 @@ export function OverviewCards({
       <div className="overview-heading">
         <h2>
           The bigger picture <span>{hostelName}</span>
+          {(stats?.date_range?.from || stats?.date_range?.to) && (
+            <span>Selected dates</span>
+          )}
         </h2>
         <span className="sync-note">
           {error ? (

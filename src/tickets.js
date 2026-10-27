@@ -14,19 +14,28 @@ export const categories = [
   "Mess Food",
   "Other",
 ];
-export const blocks = ["KP-1", "KP-2", "KP-3"];
+export { blocks } from "./hostels.js";
 export const statuses = ["Open", "In Progress", "Resolved"];
 export const dateValue = (value) =>
   new Date(value?.replace(" ", "T") + (value?.endsWith("Z") ? "" : "Z"));
 export const formatDate = (value) =>
   value
     ? dateValue(value).toLocaleString(undefined, {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
         month: "short",
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
       })
     : "";
+export const campusDate = (value = new Date()) =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(value);
 
 // List controls never change the server's overview counts.
 export function filterTickets(

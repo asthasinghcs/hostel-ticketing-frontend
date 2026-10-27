@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api, saveSession } from "./api";
 import Icon from "./Icon";
 import { Brand } from "./components";
-import { blocks } from "./tickets";
+import HostelPicker from "./HostelPicker";
 
 function HostelIllustration() {
   return (
@@ -170,38 +170,13 @@ export default function Auth({ notice, onLogin }) {
           <form onSubmit={submit}>
             <fieldset disabled={busy}>
               {portal === "student" && (
-                <fieldset className="hostel-choice">
-                  <legend>Your hostel</legend>
-                  <div className="hostel-options">
-                    {blocks.map((block, index) => (
-                      <button
-                        type="button"
-                        key={block}
-                        className={`hostel-option ${form.hostel_block === block ? "selected" : ""}`}
-                        aria-pressed={form.hostel_block === block}
-                        onClick={() => {
-                          setForm({ ...form, hostel_block: block });
-                          setError("");
-                        }}
-                      >
-                        <Icon name="building" size={23} />
-                        <strong>{block}</strong>
-                        <small>
-                          Hostel {String(index + 1).padStart(2, "0")}
-                        </small>
-                        {form.hostel_block === block && (
-                          <span className="choice-check">
-                            <Icon name="check" size={10} />
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="input-hint">
-                    <Icon name="lock" size={12} /> Your account gives access to
-                    your registered hostel only.
-                  </p>
-                </fieldset>
+                <HostelPicker
+                  value={form.hostel_block}
+                  onChange={(hostel) => {
+                    setForm({ ...form, hostel_block: hostel });
+                    setError("");
+                  }}
+                />
               )}
               {mode === "signup" && (
                 <div className="field">
@@ -219,16 +194,32 @@ export default function Auth({ notice, onLogin }) {
                 </div>
               )}
               <div className="field">
-                <label htmlFor="auth-email">Email address</label>
+                <label htmlFor="auth-email">
+                  {portal === "student" ? "Roll-number email" : "Email address"}
+                </label>
                 <input
                   id="auth-email"
                   name="email"
                   type="email"
                   autoComplete="username"
+                  pattern={
+                    portal === "student" && mode === "signup"
+                      ? "[0-9]{6,12}@kiit[.]ac[.]in"
+                      : undefined
+                  }
+                  title={
+                    portal === "student"
+                      ? "Use your rollnumber@kiit.ac.in student email"
+                      : undefined
+                  }
                   maxLength={254}
                   value={form.email}
                   onChange={update}
-                  placeholder="you@kiit.ac.in"
+                  placeholder={
+                    portal === "student"
+                      ? "24054001@kiit.ac.in"
+                      : "Your staff email"
+                  }
                   required
                 />
               </div>

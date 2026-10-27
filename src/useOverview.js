@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "./api";
 
 // Counts and ticket data always belong to the same hostel and server snapshot.
-export function useOverview(block) {
+export function useOverview(block, dateFrom = "", dateTo = "") {
+  const queryKey = JSON.stringify([block, dateFrom, dateTo]);
   const [result, setResult] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const request = useRef(null);
@@ -14,21 +15,21 @@ export function useOverview(block) {
     request.current = controller;
     const version = ++sequence.current;
     return api(
-      `/api/overview?${new URLSearchParams({ hostel_block: block })}`,
+      `/api/overview?${new URLSearchParams({ hostel_block: block, date_from: dateFrom, date_to: dateTo })}`,
       { signal: controller.signal },
     )
       .then((data) => {
         if (controller.signal.aborted || version !== sequence.current)
           return false;
-        setResult({ block, data, error: "" });
+        setResult({ queryKey, data, error: "" });
         return true;
       })
       .catch((error) => {
         if (controller.signal.aborted || version !== sequence.current)
           return false;
         setResult((previous) => ({
-          block,
-          data: previous?.block === block ? previous.data : null,
+          queryKey,
+          data: previous?.queryKey === queryKey ? previous.data : null,
           error: error.message,
         }));
         return false;
@@ -39,7 +40,7 @@ export function useOverview(block) {
           setRefreshing(false);
         }
       });
-  }, [block]);
+  }, [block, dateFrom, dateTo, queryKey]);
 
   const refresh = useCallback(() => {
     setRefreshing(true);
@@ -63,7 +64,7 @@ export function useOverview(block) {
     };
   }, [load]);
 
-  const current = result?.block === block ? result : null;
+  const current = result?.queryKey === queryKey ? result : null;
   return {
     data: current?.data,
     error: current?.error || "",

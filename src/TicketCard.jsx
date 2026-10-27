@@ -33,6 +33,7 @@ export default function TicketCard({
                 HC-{String(ticket.id).padStart(3, "0")}
               </span>
               <span className="ticket-block">{ticket.hostel_block}</span>
+              {ticket.is_demo && <span className="demo-label">Demo</span>}
               {ticket.user_id === user.id && (
                 <span className="your-ticket">Your ticket</span>
               )}
@@ -44,6 +45,12 @@ export default function TicketCard({
             {ticket.status}
           </span>
         </div>
+        {ticket.author_name && (
+          <p className="ticket-author">
+            Raised by <strong>{ticket.author_name}</strong>
+            {ticket.author_email && <span> · {ticket.author_email}</span>}
+          </p>
+        )}
         <p className="ticket-description">{ticket.description}</p>
         <div className="ticket-location">
           <Icon name="building" size={13} />
@@ -109,28 +116,40 @@ export default function TicketCard({
           )}
         </div>
       </div>
-      {expanded && <Comments ticketId={ticket.id} />}
+      {expanded && (
+        <Comments
+          ticketId={ticket.id}
+          statusKey={`${ticket.status}|${ticket.resolved_at}`}
+        />
+      )}
     </article>
   );
 }
 
-function Comments({ ticketId }) {
+function Comments({ ticketId, statusKey }) {
   const [comments, setComments] = useState(null);
+  const [history, setHistory] = useState([]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
-    api(`/api/tickets/${ticketId}/comments`, { signal: controller.signal })
-      .then((data) => {
-        if (!controller.signal.aborted) setComments(data);
+    Promise.all([
+      api(`/api/tickets/${ticketId}/comments`, { signal: controller.signal }),
+      api(`/api/tickets/${ticketId}/history`, { signal: controller.signal }),
+    ])
+      .then(([data, events]) => {
+        if (!controller.signal.aborted) {
+          setComments(data);
+          setHistory(events);
+        }
       })
       .catch((err) => {
         if (!controller.signal.aborted) setError(err.message);
       });
     return () => controller.abort();
-  }, [ticketId, revision]);
+  }, [ticketId, revision, statusKey]);
   async function submit(event) {
     event.preventDefault();
     if (busy || !text.trim()) return;
@@ -155,6 +174,32 @@ function Comments({ ticketId }) {
       className="comments"
       aria-label={`Discussion for ticket ${ticketId}`}
     >
+      <details className="ticket-history">
+        <summary>
+          <Icon name="clock" size={15} />
+          Date-wise ticket history <Icon name="down" size={13} />
+        </summary>
+        <ol>
+          {history.map((event) => (
+            <li key={event.id}>
+              <span className="history-dot" />
+              <div>
+                <strong>
+                  {event.event_type === "created"
+                    ? "Grievance raised"
+                    : `${event.from_status} → ${event.to_status}`}
+                </strong>
+                <small>
+                  {event.actor_name || "Recorded activity"} ·{" "}
+                  {event.actor_role || "system"}
+                </small>
+                <time>{formatDate(event.created_at)} IST</time>
+              </div>
+            </li>
+          ))}
+        </ol>
+        {!history.length && <p>No activity loaded yet.</p>}
+      </details>
       <h4>
         <Icon name="message" size={16} />
         The conversation

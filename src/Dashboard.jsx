@@ -8,10 +8,14 @@ import Sidebar from "./Sidebar";
 import { OverviewCards, Insights } from "./OverviewPanels";
 import TicketCard from "./TicketCard";
 import TicketForm from "./TicketForm";
+import DateFilters from "./DateFilters";
+import { hostelCount, hostelGroups } from "./hostels";
 
 export default function Dashboard({ user, onLogout }) {
   const staff = user.role === "admin" || user.role === "warden";
   const [block, setBlock] = useState(staff ? "" : user.hostel_block);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [view, setView] = useState("all");
   const [status, setStatus] = useState("All");
   const [category, setCategory] = useState("All");
@@ -24,7 +28,7 @@ export default function Dashboard({ user, onLogout }) {
   const [showHelp, setShowHelp] = useState(false);
   const [menu, setMenu] = useState(false);
   const searchInput = useRef(null);
-  const overview = useOverview(block);
+  const overview = useOverview(block, dateFrom, dateTo);
   const { data, loading, refreshing, refresh } = overview;
   const tickets = data?.tickets || [];
   const stats = data?.stats;
@@ -88,10 +92,15 @@ export default function Dashboard({ user, onLogout }) {
     setCategory("All");
     setSearch("");
     setSort("newest");
-    const refreshed = await refresh();
+    const dateFiltersChanged = Boolean(dateFrom || dateTo);
+    if (dateFiltersChanged) {
+      setDateFrom("");
+      setDateTo("");
+    }
+    const refreshed = dateFiltersChanged ? false : await refresh();
     setShowForm(false);
     setNotice(
-      `Ticket #${ticket.id} raised successfully.${refreshed ? " Your hostel's counts are up to date." : " Please refresh the overview to update your counts."}`,
+      `Ticket #${ticket.id} raised successfully.${dateFiltersChanged ? " Date filters were cleared to show your new ticket." : refreshed ? " Your hostel's counts are up to date." : " Please refresh the overview to update your counts."}`,
     );
   }
   async function logout() {
@@ -241,6 +250,35 @@ export default function Dashboard({ user, onLogout }) {
               <span className="art-label">A little care changes a lot.</span>
             </div>
           </div>
+          <div className="hostel-coverage">
+            <Icon name="building" size={15} />
+            <span>
+              {staff
+                ? `${hostelCount} hostels available`
+                : `Your private ${user.hostel_block} workspace`}
+            </span>
+            {staff &&
+              hostelGroups.map((group) => (
+                <strong key={group.code}>
+                  {group.code} · {group.hostels.length}
+                </strong>
+              ))}
+          </div>
+          <DateFilters
+            key={`${dateFrom}|${dateTo}`}
+            {...{ dateFrom, dateTo, stats, loading }}
+            onChange={(from, to) => {
+              setDateFrom(from);
+              setDateTo(to);
+            }}
+          />
+          {stats?.demo_count > 0 && (
+            <p className="demo-banner">
+              <Icon name="ticket" size={14} />
+              Includes {stats.demo_count} labelled synthetic demo grievances in
+              this view.
+            </p>
+          )}
           <OverviewCards
             {...{ staff, hostelName, stats, loading }}
             error={overview.error}

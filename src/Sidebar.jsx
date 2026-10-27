@@ -1,6 +1,6 @@
 import Icon from "./Icon";
 import { Brand } from "./components";
-import { blocks } from "./tickets";
+import { hostelGroups, hostelCount } from "./hostels";
 
 export default function Sidebar({
   user,
@@ -70,25 +70,47 @@ export default function Sidebar({
           {staff ? "HOSTEL DIRECTORY" : "YOUR COMMUNITY"}
         </div>
         {staff ? (
-          <div className="hostel-directory">
-            {["", ...blocks].map((value) => (
-              <button
-                key={value}
-                className={
-                  block === value ? "directory-link selected" : "directory-link"
-                }
-                disabled={busy}
-                aria-pressed={block === value}
-                onClick={() => {
-                  setBlock(value);
-                  setMenu(false);
-                }}
-              >
-                <span className={`directory-dot dot-${value || "all"}`} />
-                {value || "All hostels"}
-                {value === block && <Icon name="check" size={15} />}
-              </button>
-            ))}
+          <div className="hostel-directory compact-directory">
+            <button
+              className={`directory-link ${!block ? "selected" : ""}`}
+              disabled={busy}
+              onClick={() => {
+                setBlock("");
+                setMenu(false);
+              }}
+            >
+              <Icon name="building" size={16} /> All hostels{" "}
+              <span className="directory-total">{hostelCount}</span>
+            </button>
+            <label htmlFor="directory-hostel">View a hostel</label>
+            <select
+              id="directory-hostel"
+              value={block}
+              disabled={busy}
+              onChange={(event) => {
+                setBlock(event.target.value);
+                setMenu(false);
+              }}
+            >
+              <option value="">All {hostelCount} hostels</option>
+              {hostelGroups.map((group) => (
+                <optgroup
+                  label={`${group.name} (${group.hostels.length})`}
+                  key={group.code}
+                >
+                  {group.hostels.map((value) => (
+                    <option key={value}>{value}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <div className="directory-summary">
+              {hostelGroups.map((group) => (
+                <span key={group.code}>
+                  {group.code} <strong>{group.hostels.length}</strong>
+                </span>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="student-hostel">
