@@ -45,3 +45,7 @@ The app supports 36 configured hostels: KP-1–KP-25 and QC-1–QC-11. New stude
 ## Professor demonstration
 
 Use [the quick professor demo guide](docs/PROFESSOR_DEMO.md) for verified mock logins, exact hostel choices, date filters, and the presentation walkthrough.
+
+## Neon deployment
+
+See [Neon setup and verification](docs/NEON_SETUP.md) for CLI commands, private connection configuration, migration results, and build/end-to-end proof.
