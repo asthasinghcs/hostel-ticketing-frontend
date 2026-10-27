@@ -1,16 +1,37 @@
-# React + Vite
+# HostelCare — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + Vite interface for student, warden, and administrator workflows. The matching Flask backend is required.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Use Node 22.22.3 or a compatible version supported by Vite.
 
-## React Compiler
+```powershell
+npm ci
+Copy-Item .env.example .env.local
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Start the backend on port 5000. Open http://localhost:5173. Change VITE_API_URL in .env.local if necessary; restart Vite after changing it. Production builds fall back to the existing Render backend, but an explicit VITE_API_URL is recommended.
 
-## Expanding the Oxlint configuration
+## Checks
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```powershell
+npm test
+npm run lint
+npm run build
+```
+
+Twelve frontend tests cover filters, search, personal counts, authentication, expiry, stale requests, cancellation, timeouts, and error handling. The production output is dist/.
+
+## Behavior
+
+- Signup creates student accounts and signs them in immediately.
+- Reload restores the server-verified identity from a tab-scoped session.
+- Students submit tickets for their block, vote once, and comment.
+- Students access only their registered hostel; wardens and admins manage all hostels.
+- Search, category/status filters, personal tickets, sorting, live counts, and discussions are available in the workspace. Only staff can switch hostels.
+
+The API enforces these rules independently of the interface.
+
+See [the complete project guide](docs/PROJECT.md) for architecture, API contracts, migration, staff provisioning, deployment, and verified results.
