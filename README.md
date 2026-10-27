@@ -41,3 +41,7 @@ See [the complete project guide](docs/PROJECT.md) for architecture, API contract
 The app supports 36 configured hostels: KP-1–KP-25 and QC-1–QC-11. New student accounts use rollnumber@kiit.ac.in. Today, Last 7 days, From/To filters, daily totals, and ticket history use India time.
 
 [Demo accounts and import instructions](docs/DEMO_ACCOUNTS.md) lists all 40 synthetic student logins and three staff logins. The backend fixture is appended once with `python seed.py --append-demo` after setting DATABASE_PATH; it preserves existing records and detects repeats. The concrete local sample increased the ticket total from 20 to 60.
+
+## Professor demonstration
+
+Use [the quick professor demo guide](docs/PROFESSOR_DEMO.md) for verified mock logins, exact hostel choices, date filters, and the presentation walkthrough.
