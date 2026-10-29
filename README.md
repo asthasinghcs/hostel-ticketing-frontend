@@ -71,5 +71,3 @@ npm run build
 | [Neon deployment](docs/NEON_SETUP.md) | Database setup, migration, and verification. |
 
 The recorded baseline passed 14 frontend tests, 38 backend tests, 40 API boundary checks, lint, and the production build. Performance and full accessibility audits are listed as unmeasured targets in the SRS.
-
-**Software Engineering · CS-02 · KIIT** — Sonali Kamila, Pratiksha Vyas, Astha Singh.
