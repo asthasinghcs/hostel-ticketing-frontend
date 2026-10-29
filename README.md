@@ -1,10 +1,51 @@
-# HostelCare — Frontend
+# HostelCare
 
-React + Vite interface for student, warden, and administrator workflows. The matching Flask backend is required.
+**A hostel grievance portal for students and wardens.** Students raise and follow maintenance requests in their assigned hostel; wardens review and manage requests across the full campus.
+
+### [Open the live application →](https://hostelgrievance.onrender.com/)
+
+[Frontend repository](https://github.com/asthasinghcs/hostel-ticketing-frontend) · [Backend and API](https://github.com/asthasinghcs/hostel-ticketing-backend) · [Software Requirements Specification](docs/HostelCare_SRS.pdf) · [Professor demo guide](docs/PROFESSOR_DEMO.md)
+
+![HostelCare student workspace](docs/srs-assets/ui.png)
+
+## Try the demo
+
+| Role | Choose on the landing page | Email | Password |
+| --- | --- | --- | --- |
+| KP-1 student | Student → KP → KP-1 | `24054001@kiit.ac.in` | `Demo!KP1.01a` |
+| QC-1 student | Student → QC → QC-1 | `24054026@kiit.ac.in` | `Demo!QC1.26a` |
+| Warden | Warden & admin | `hostelcare.demo.kp@gmail.com` | `Demo!Staff.KP.42` |
+
+These are fictional public demonstration accounts. The KP-1 student sees KP-1 requests, the QC-1 student sees QC-1 requests, and the warden can switch among all 36 configured hostels. A student cannot gain another hostel’s access by changing the landing-page choice or an API parameter. See the [five-minute walkthrough](docs/PROFESSOR_DEMO.md) and [full demo account list](docs/DEMO_ACCOUNTS.md).
+
+## What the application does
+
+- **Hostel-specific access:** KP-1 through KP-25 and QC-1 through QC-11; students stay within their registered hostel while wardens and admins can review every hostel.
+- **Grievance workflow:** create a ticket, follow Open → In Progress → Resolved, reopen when needed, and see timestamped history.
+- **Community feedback:** students can upvote an unresolved request once and discuss tickets in comments.
+- **Clear counts:** total and status counters refresh after changes and remain consistent with the selected hostel and date range.
+- **Find and track:** search and filter by category, status, personal tickets or overdue state; inspect daily activity in India time.
+- **Responsive interface:** desktop and narrow-screen layouts, labelled controls, visible request feedback, and session-aware navigation.
+
+The project includes a labelled set of 40 synthetic grievances dated 21–27 October 2026. Select those exact dates to show the fixed sample later; “Last 7 days” follows the current date. Live totals can change as visitors use the demo.
+
+## Architecture
+
+```text
+React + Vite client (Render static site)
+            │ HTTPS / JSON
+            ▼
+Flask REST API (Render web service)
+            │
+            ▼
+Neon PostgreSQL (live data)
+```
+
+The API verifies the signed-in user, role, and stored hostel on each protected request. It uses hashed passwords and expiring, revocable sessions. The frontend never receives database credentials. SQLite is available for isolated local development and tests.
 
 ## Run locally
 
-Use Node 22.22.3 or a compatible version supported by Vite.
+Requires Node.js compatible with Vite 8 and a running [backend](https://github.com/asthasinghcs/hostel-ticketing-backend#run-locally).
 
 ```powershell
 npm ci
@@ -12,9 +53,7 @@ Copy-Item .env.example .env.local
 npm run dev
 ```
 
-Start the backend on port 5000. Open http://localhost:5173. Change VITE_API_URL in .env.local if necessary; restart Vite after changing it. Production builds fall back to the existing Render backend, but an explicit VITE_API_URL is recommended.
-
-## Checks
+The example environment points `VITE_API_URL` to `http://localhost:5000`. Open `http://localhost:5173`. Restart Vite after changing an environment variable.
 
 ```powershell
 npm test
@@ -22,34 +61,15 @@ npm run lint
 npm run build
 ```
 
-Fourteen frontend tests cover filters, search, personal counts, authentication, expiry, stale requests, cancellation, timeouts, and error handling. The production output is dist/.
+## Project documents
 
-## Behavior
+| Document | Contents |
+| --- | --- |
+| [SRS (PDF)](docs/HostelCare_SRS.pdf) · [Word](docs/HostelCare_SRS.docx) · [source](docs/SRS.md) | Requirements, use cases, UI and database models, acceptance criteria, traceability, and testing report. |
+| [Validation evidence](docs/validation/README.md) | Reproducible boundary checks and recorded API, storage, build, and regression results. |
+| [Project guide](docs/PROJECT.md) | Architecture, API contract, roles, deployment, and maintenance details. |
+| [Neon deployment](docs/NEON_SETUP.md) | Database setup, migration, and verification. |
 
-- Signup creates student accounts and signs them in immediately.
-- Reload restores the server-verified identity from a tab-scoped session.
-- Students submit tickets for their block, vote once, and comment.
-- Students access only their registered hostel; wardens and admins manage all hostels.
-- Search, category/status filters, personal tickets, sorting, live counts, and discussions are available in the workspace. Only staff can switch hostels.
+The recorded baseline passed 14 frontend tests, 38 backend tests, 40 API boundary checks, lint, and the production build. Performance and full accessibility audits are listed as unmeasured targets in the SRS.
 
-The API enforces these rules independently of the interface.
-
-See [the complete project guide](docs/PROJECT.md) for architecture, API contracts, migration, staff provisioning, deployment, and verified results.
-
-## Hostels, recent demo data, and dates
-
-The app supports 36 configured hostels: KP-1–KP-25 and QC-1–QC-11. New student accounts use rollnumber@kiit.ac.in. Today, Last 7 days, From/To filters, daily totals, and ticket history use India time.
-
-[Demo accounts and import instructions](docs/DEMO_ACCOUNTS.md) lists all 40 synthetic student logins and three staff logins. The backend fixture is appended once with `python seed.py --append-demo` after setting DATABASE_PATH; it preserves existing records and detects repeats. The concrete local sample increased the ticket total from 20 to 60.
-
-## Professor demonstration
-
-Use [the quick professor demo guide](docs/PROFESSOR_DEMO.md) for verified mock logins, exact hostel choices, date filters, and the presentation walkthrough.
-
-## Neon deployment
-
-See [Neon setup and verification](docs/NEON_SETUP.md) for CLI commands, private connection configuration, migration results, and build/end-to-end proof.
-
-## Software Requirements Specification
-
-The submission includes the [SRS source](docs/SRS.md), [14-page PDF](docs/HostelCare_SRS.pdf), [editable Word document](docs/HostelCare_SRS.docx), and [validation report and reproducible boundary checks](docs/validation/README.md). It covers requirements, use cases, UI, database design, interfaces, testing and traceability.
+**Software Engineering · CS-02 · KIIT** — Sonali Kamila, Pratiksha Vyas, Astha Singh.
